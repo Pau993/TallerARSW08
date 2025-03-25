@@ -34,6 +34,8 @@ var app = (function () {
 
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
+
+            
             stompClient.subscribe('/topic/newpoint', function (eventbody) {
                 var theObject=JSON.parse(eventbody.body);
                 alert("New point received: "+theObject.x+" "+theObject.y);
