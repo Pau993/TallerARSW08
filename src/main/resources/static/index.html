@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <html>
     <head>
-        <title>TODO supply a title</title>
+        <title>Collab Paint</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="/webjars/jquery/3.6.0/jquery.min.js"></script>
@@ -27,9 +27,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <script src="app.js"></script>
     </head>
     <body onload="app.init()">
+        <h2>Colaborative Drawing</h2>
         X:<input id="xValue" type="number"/>
         Y:<input id="yValue" type="number"/>        
         <button id="sendButton", onclick="app.publishPoint(document.getElementById('xValue').value, document.getElementById('yValue').value)">Send point</button>
-        <canvas id="canvas" width="800" height="600"></canvas>
+        <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
     </body>
 </html>

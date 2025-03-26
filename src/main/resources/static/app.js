@@ -47,14 +47,22 @@ var app = (function () {
 
             stompClient.subscribe("/topic/newpoint", function (message) {
                 var theObject = JSON.parse(message.body);
-                alert("New point received: X=" + theObject.x + ", Y=" + theObject.y);
-                addPointToCanvas(theObject);
+                drawPoint(point.x, point.y);
             });
 
         }, function (error) {
             console.error("Error al conectar con STOMP:", error);
         });
     };
+
+    var drawPoint = function (x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1, 0, 2 * Math.PI);
+        ctx.fillStyle = "red";
+        ctx.fill();
+    };
+
+
 
     return {
         init: function () {
