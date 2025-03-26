@@ -45,7 +45,7 @@ var app = (function () {
         }
     
         var pt = new Point(px, py);
-        console.info("📡 Enviando punto:", pt);
+        console.info("📱 Enviando punto:", pt);
         addPointToCanvas(pt);
     
         var topic = "/app/newpoint." + drawingId;
