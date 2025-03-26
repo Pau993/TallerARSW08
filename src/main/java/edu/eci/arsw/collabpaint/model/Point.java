@@ -16,10 +16,14 @@
  */
 package edu.eci.arsw.collabpaint.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 /**
  *
  * @author hcadavid
  */
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Point {
     int x,y;
 
@@ -51,8 +55,5 @@ public class Point {
     public String toString() {
         return "Point{" + "x=" + x + ", y=" + y + '}';
     }
-    
-    
-    
     
 }

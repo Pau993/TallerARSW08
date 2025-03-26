@@ -20,32 +20,26 @@ package edu.eci.arsw.collabpaint;
  *
  * @author hcadavid
  */
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+
+ import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-
-@Configuration
-@EnableWebSocketMessageBroker
-public class CollabPaintWebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
-
-    @Autowired
-    public CollabPaintWebSocketConfig() {
-    }
-
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
-        config.setApplicationDestinationPrefixes("/app");        
-    }
-
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/stompendpoint").withSockJS();
-        
-    }
-    
-
-}
+ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+ 
+ @Configuration
+ @EnableWebSocketMessageBroker
+ public class CollabPaintWebSocketConfig implements WebSocketMessageBrokerConfigurer {
+     @Override
+     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
+         registry.addEndpoint("/stompendpoint").withSockJS();
+     }
+ 
+     @Override
+     public void configureMessageBroker(@NonNull MessageBrokerRegistry registry) {
+         registry.enableSimpleBroker("/topic");
+         registry.setApplicationDestinationPrefixes("/app");
+     }
+ }
+ 
