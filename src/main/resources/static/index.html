@@ -24,13 +24,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <script src="/webjars/bootstrap/5.1.0/js/bootstrap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-        <script src="app.js"></script>
+
     </head>
     <body onload="app.init()">
         <h2>Colaborative Drawing</h2>
         X:<input id="xValue" type="number"/>
-        Y:<input id="yValue" type="number"/>        
-        <button id="sendButton", onclick="app.publishPoint(document.getElementById('xValue').value, document.getElementById('yValue').value)">Send point</button>
+        Y:<input id="yValue" type="number"/> 
+        <input type="number" id="drawingId" placeholder="ID del dibujo">
+        <button id="connectButton">Conectarse</button>       
+        <button id="sendButton" onclick="app.publishPoint(parseInt(document.getElementById('xValue').value), parseInt(document.getElementById('yValue').value))">Send point</button>
         <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
+        <script src="app.js"></script>
     </body>
 </html>

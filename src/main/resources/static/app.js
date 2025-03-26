@@ -1,5 +1,4 @@
 var app = (function () {
-
     class Point {
         constructor(x, y) {
             this.x = x;
@@ -7,97 +6,109 @@ var app = (function () {
         }
     }
 
-    
-    const socket = new SockJS("http://localhost:8080/stompendpoint");
-    const stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, function (frame) {
-        console.log("Conectado: " + frame);
-        stompClient.subscribe("/topic/someTopic", function (message) {
-            console.log("Mensaje recibido: " + message.body);
-        });
-    });
-
-    var addPointToCanvas = function (point) {
-        var canvas = document.getElementById("canvas");
-        var ctx = canvas.getContext("2d");
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
-        ctx.fillStyle = "red";
-        ctx.fill();
-        ctx.stroke();
-    };
-
-    var getMousePosition = function (evt) {
-        var canvas = document.getElementById("canvas");
-        var rect = canvas.getBoundingClientRect();
-        return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top
-        };
-    };
+    var stompClient = null;
+    var drawingId = null; 
+    var canvas = null;
+    var ctx = null;
 
     var connectAndSubscribe = function () {
-        console.info("Connecting to WS...");
-        var socket = new SockJS("/stompendpoint");
-
+        drawingId = document.getElementById("drawingId").value.trim();
+        if (!drawingId) {
+            alert("Por favor, ingrese un identificador de dibujo.");
+            return;
+        }
+    
+        console.info("Conectando al WebSocket para el dibujo ID:", drawingId);
+        var socket = new SockJS("http://localhost:8080/stompendpoint");
         stompClient = Stomp.over(socket);
+    
         stompClient.connect({}, function (frame) {
-            console.log("Connected: " + frame);
-
-            stompClient.subscribe("/topic/newpoint", function (message) {
+            console.log("Conectado: " + frame);
+            var topic = "/topic/newpoint." + drawingId;
+    
+            stompClient.subscribe(topic, function (message) {
                 var theObject = JSON.parse(message.body);
-                drawPoint(point.x, point.y);
+                alert("Nuevo punto recibido: X = " + theObject.x + ", Y = " + theObject.y);
+                addPointToCanvas(new Point(theObject.x, theObject.y));
             });
-
+    
+            alert("Conectado al dibujo #" + drawingId);
         }, function (error) {
             console.error("Error al conectar con STOMP:", error);
         });
     };
+    
+    var publishPoint = function (px, py) {
+        if (!stompClient || !drawingId) {
+            alert("Debe conectarse primero a un dibujo.");
+            return;
+        }
+    
+        var pt = new Point(px, py);
+        console.info("📡 Enviando punto:", pt);
+        addPointToCanvas(pt);
+    
+        var topic = "/app/newpoint." + drawingId;
+        stompClient.send(topic, {}, JSON.stringify(pt));
+    };
 
-    var drawPoint = function (x, y) {
+    var addPointToCanvas = function (point) {
+        if (!ctx) return;
         ctx.beginPath();
-        ctx.arc(x, y, 1, 0, 2 * Math.PI);
+        ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
         ctx.fillStyle = "red";
         ctx.fill();
     };
 
+    var getMousePosition = function (evt) {
+        var rect = canvas.getBoundingClientRect();
+        return new Point(evt.clientX - rect.left, evt.clientY - rect.top);
+    };
 
+    var init = function () {
+        canvas = document.getElementById("canvas");
+        if (!canvas) {
+            console.error("No se encontró el canvas en el DOM.");
+            return;
+        }
+        ctx = canvas.getContext("2d");
+
+        canvas.addEventListener("click", function (event) {
+            if (!stompClient || !drawingId) {
+                alert("Debe conectarse primero a un dibujo.");
+                return;
+            }
+
+            var pos = getMousePosition(event);
+            console.log(" Punto capturado en canvas:", pos);
+            app.publishPoint(pos.x, pos.y);
+        });
+
+        console.log("Aplicación inicializada.");
+    };
 
     return {
-        init: function () {
-            var can = document.getElementById("canvas");
-
-            document.getElementById("sendButton").addEventListener("click", function () {
-                var x = parseInt(document.getElementById("xValue").value);
-                var y = parseInt(document.getElementById("yValue").value);
-                app.publishPoint(x, y);
-            });
-
-            can.addEventListener("click", function (event) {
-                var pos = getMousePosition(event);
-                app.publishPoint(pos.x, pos.y);
-            });
-
+        connect: function () {
             connectAndSubscribe();
         },
-
-        publishPoint: function (px, py) {
-            var pt = new Point(px, py);
-            console.info("Publishing point at", pt);
-            addPointToCanvas(pt);
-
-            if (stompClient !== null) {
-                stompClient.send("/app/newpoint", {}, JSON.stringify(pt));
-            }
-        },
-
         disconnect: function () {
             if (stompClient !== null) {
                 stompClient.disconnect();
             }
-            console.log("Disconnected");
-        }
+            drawingId = null;
+            console.log("Desconectado");
+            alert("Desconectado del WebSocket.");
+        },
+        init: init,
+        publishPoint: publishPoint
     };
 
 })();
+
+document.addEventListener("DOMContentLoaded", function () {
+    app.init();
+});
+
+document.getElementById("connectButton").addEventListener("click", function () {
+    app.connect();
+});
