@@ -1,114 +1,101 @@
 var app = (function () {
+
     class Point {
         constructor(x, y) {
             this.x = x;
             this.y = y;
-        }
+        }        
     }
-
+    
     var stompClient = null;
-    var drawingId = null; 
-    var canvas = null;
-    var ctx = null;
+
+    var addPointToCanvas = function (point) {        
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 1, 0, 2 * Math.PI);
+        ctx.stroke();
+    };
+
+    var addPolygonToCanvas = function (polygon) {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        ctx.beginPath();
+        ctx.moveTo(polygon[0].x, polygon[0].y);
+        for (var i = 1; i < polygon.length; i++) {
+            ctx.lineTo(polygon[i].x, polygon[i].y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    };
+    
+    var getMousePosition = function (evt) {
+        var canvas = document.getElementById("canvas");
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    };
 
     var connectAndSubscribe = function () {
-        drawingId = document.getElementById("drawingId").value.trim();
-        if (!drawingId) {
-            alert("Por favor, ingrese un identificador de dibujo.");
-            return;
-        }
-    
-        console.info("Conectando al WebSocket para el dibujo ID:", drawingId);
-        var socket = new SockJS("http://localhost:8080/stompendpoint");
+        console.info('Connecting to WS...');
+        var socket = new SockJS('/stompendpoint');
         stompClient = Stomp.over(socket);
-    
+        
+        var topicId = document.getElementById("topicId").value;
         stompClient.connect({}, function (frame) {
-            console.log("Conectado: " + frame);
-            var topic = "/topic/newpoint." + drawingId;
-    
-            stompClient.subscribe(topic, function (message) {
-                var theObject = JSON.parse(message.body);
-                alert("Nuevo punto recibido: X = " + theObject.x + ", Y = " + theObject.y);
-                addPointToCanvas(new Point(theObject.x, theObject.y));
+            console.log('Connected: ' + frame);
+            alert("Conectado al WebSocket.");
+            stompClient.subscribe('/topic/newpoint.' + topicId, function (eventbody) {
+                var newPoint = JSON.parse(eventbody.body);
+                addPointToCanvas(newPoint);
+                alert("Nuevo punto recibido: X = " + newPoint.x + ", Y = " + newPoint.y);
             });
-    
-            alert("Conectado al dibujo #" + drawingId);
+            stompClient.subscribe('/topic/newpolygon.' + topicId, function (eventbody) {
+                var newPolygon = JSON.parse(eventbody.body);
+                addPolygonToCanvas(newPolygon);
+                alert("Nuevo polígono recibido con " + newPolygon.length + " puntos.");
+            });
         }, function (error) {
             console.error("Error al conectar con STOMP:", error);
+            alert("Error al conectar con STOMP.");
         });
     };
     
-    var publishPoint = function (px, py) {
-        if (!stompClient || !drawingId) {
-            alert("Debe conectarse primero a un dibujo.");
-            return;
-        }
-    
-        var pt = new Point(px, py);
-        console.info("📱 Enviando punto:", pt);
-        addPointToCanvas(pt);
-    
-        var topic = "/app/newpoint." + drawingId;
-        stompClient.send(topic, {}, JSON.stringify(pt));
-    };
-
-    var addPointToCanvas = function (point) {
-        if (!ctx) return;
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
-        ctx.fillStyle = "red";
-        ctx.fill();
-    };
-
-    var getMousePosition = function (evt) {
-        var rect = canvas.getBoundingClientRect();
-        return new Point(evt.clientX - rect.left, evt.clientY - rect.top);
-    };
-
-    var init = function () {
-        canvas = document.getElementById("canvas");
-        if (!canvas) {
-            console.error("No se encontró el canvas en el DOM.");
-            return;
-        }
-        ctx = canvas.getContext("2d");
-
-        canvas.addEventListener("click", function (event) {
-            if (!stompClient || !drawingId) {
-                alert("Debe conectarse primero a un dibujo.");
-                return;
-            }
-
-            var pos = getMousePosition(event);
-            console.log(" Punto capturado en canvas:", pos);
-            app.publishPoint(pos.x, pos.y);
-        });
-
-        console.log("Aplicación inicializada.");
-    };
-
     return {
-        connect: function () {
-            connectAndSubscribe();
+
+        init: function () {
+            var can = document.getElementById("canvas");
+            if (window.PointerEvent) {
+                can.addEventListener("click", function (evt) {
+                    var offset = getMousePosition(evt);
+                    app.publishPoint(offset.x, offset.y);
+                });
+            }
+            var connectBtn = document.getElementById("connectButton");
+            connectBtn.addEventListener('click', function () {
+                var ctx = can.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                connectAndSubscribe();
+            });
         },
+
+        publishPoint: function(px, py) {
+            var pt = new Point(px, py);
+            console.info("publishing point at " + pt);
+            alert("Enviando punto: X = " + pt.x + ", Y = " + pt.y);
+            var topicId = document.getElementById("topicId").value;
+            stompClient.send("/app/newpoint." + topicId, {}, JSON.stringify(pt)); 
+        },
+
         disconnect: function () {
             if (stompClient !== null) {
                 stompClient.disconnect();
             }
-            drawingId = null;
-            console.log("Desconectado");
+            console.log("Disconnected");
             alert("Desconectado del WebSocket.");
-        },
-        init: init,
-        publishPoint: publishPoint
+        }
     };
 
 })();
-
-document.addEventListener("DOMContentLoaded", function () {
-    app.init();
-});
-
-document.getElementById("connectButton").addEventListener("click", function () {
-    app.connect();
-});

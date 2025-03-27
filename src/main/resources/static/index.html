@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <script src="/webjars/bootstrap/5.1.0/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-
 </head>
 
 <body onload="app.init()">
@@ -33,9 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <label>X:</label> <input id="xValue" type="number" />
     <label>Y:</label> <input id="yValue" type="number" />
-    <input type="number" id="drawingId" placeholder="ID del dibujo">
-    <button onclick="app.connect()">Conectarse</button>
-    <button onclick="app.publishPoint()">Enviar Punto</button>
+    <input type="number" id="topicId" placeholder="ID del dibujo">
+    <button id="connectButton">Conectarse</button>
+    <button onclick="app.publishPoint(
+        parseInt(document.getElementById('xValue').value),
+        parseInt(document.getElementById('yValue').value)
+    )">Enviar Punto</button>
 
     <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
     <script src="app.js"></script>
