@@ -127,10 +127,9 @@ Para ver cómo manejar esto desde el manejador de eventos STOMP del servidor, re
  
 ![image](https://github.com/user-attachments/assets/bc907567-6f38-425c-bbe3-2d1f60633328)
 
-    
-	4. Verifique la funcionalidad: igual a la anterior, pero ahora dibujando polígonos cada vez que se agreguen cuatro puntos.
-	
-	![image](https://github.com/user-attachments/assets/91bd6ce9-4528-4612-914d-92c1288f1b9e)
+4. Segunda verificacion con cuatro puntos:
+
+![image](https://github.com/user-attachments/assets/c3d5f672-9252-4dcb-a94d-60407940c50d)
 
 5. A partir de los diagramas dados en el archivo ASTAH incluido, haga un nuevo diagrama de actividades correspondiente a lo realizado hasta este punto, teniendo en cuenta el detalle de que ahora se tendrán tópicos dinámicos para manejar diferentes dibujos simultáneamente.
 
