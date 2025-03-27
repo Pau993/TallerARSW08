@@ -69,7 +69,7 @@ Para hacer mas útil la aplicación, en lugar de capturar las coordenadas con ca
 	```bash
 	git commit -m "PARTE 2".
 	```
-
+https://github.com/user-attachments/assets/8078980b-f27f-4782-902d-c85408491a38
 ## Parte III.
 
 Ajuste la aplicación anterior para que pueda manejar más de un dibujo a la vez, manteniendo tópicos independientes. Para esto:
@@ -83,6 +83,8 @@ Ajuste la aplicación anterior para que pueda manejar más de un dibujo a la vez
 	git commit -m "PARTE 3".
 	```
 
+
+https://github.com/user-attachments/assets/b5d633cf-4861-4f46-8254-5f1f493d23d5
 
 ## Parte IV.
 
@@ -122,9 +124,14 @@ Para ver cómo manejar esto desde el manejador de eventos STOMP del servidor, re
 	2. El manejador de eventos de /app/newpoint.{numdibujo}, además de propagar los puntos a través del tópico '/topic/newpoints', llevará el control de los puntos recibidos(que podrán haber sido dibujados por diferentes clientes). Cuando se completen tres o más puntos, publicará el polígono en el tópico '/topic/newpolygon'. Recuerde que esto se realizará concurrentemente, de manera que REVISE LAS POSIBLES CONDICIONES DE CARRERA!. También tenga en cuenta que desde el manejador de eventos del servidor se tendrán N dibujos independientes!.
 
 	3. El cliente, ahora también se suscribirá al tópico '/topic/newpolygon'. El 'callback' asociado a la recepción de eventos en el mismo debe, con los datos recibidos, dibujar un polígono, [tal como se muestran en ese ejemplo](http://www.arungudelli.com/html5/html5-canvas-polygon/).
+ 
+![image](https://github.com/user-attachments/assets/bc907567-6f38-425c-bbe3-2d1f60633328)
+
+    
 	4. Verifique la funcionalidad: igual a la anterior, pero ahora dibujando polígonos cada vez que se agreguen cuatro puntos.
 	
-	
+	![image](https://github.com/user-attachments/assets/91bd6ce9-4528-4612-914d-92c1288f1b9e)
+
 5. A partir de los diagramas dados en el archivo ASTAH incluido, haga un nuevo diagrama de actividades correspondiente a lo realizado hasta este punto, teniendo en cuenta el detalle de que ahora se tendrán tópicos dinámicos para manejar diferentes dibujos simultáneamente.
 
 5. Haga commit de lo realizado.
